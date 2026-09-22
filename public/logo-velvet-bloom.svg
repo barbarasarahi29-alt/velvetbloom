@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 220" width="100%" height="100%" fill="none">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,900;1,9..144,900&amp;family=Plus+Jakarta+Sans:wght@700&amp;display=swap');
+      .vb-velvet-txt {
+        font-family: 'Fraunces', 'Bookman Old Style', Georgia, serif;
+        font-size: 82px;
+        font-weight: 900;
+        letter-spacing: -2px;
+      }
+      .vb-bloom-txt {
+        font-family: 'Fraunces', 'Bookman Old Style', Georgia, serif;
+        font-size: 86px;
+        font-weight: 900;
+        letter-spacing: -2px;
+      }
+      .vb-slogan-txt {
+        font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.28em;
+      }
+    </style>
+    
+    <filter id="soft-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#381058" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- 3 Brand Petals Perched Above the 'et' of Velvet -->
+  <g transform="translate(268, 28)" filter="url(#soft-glow)">
+    <!-- Left Petal: Deep plum -->
+    <path d="M0,0 C-10,-5 -15,-16 -12,-25 C-9,-32 0,-34 6,-28 C10,-20 8,-8 0,0 Z" 
+          fill="#471457" />
+    <!-- Center Petal: Medium royal purple -->
+    <path d="M0,0 C-7,-10 -6,-24 0,-34 C6,-24 7,-10 0,0 Z" 
+          fill="#703496" />
+    <!-- Right Petal: Lavender lilac -->
+    <path d="M0,0 C10,-5 15,-16 12,-25 C9,-32 0,-34 -6,-28 C-10,-20 -8,-8 0,0 Z" 
+          fill="#A88ECC" />
+  </g>
+
+  <!-- Velvet (Top Line) -->
+  <text x="14" y="90" class="vb-velvet-txt" fill="#381058">Velvet</text>
+
+  <!-- Bloom (Bottom Line) -->
+  <text x="20" y="166" class="vb-bloom-txt" fill="#652F94">Bloom</text>
+
+  <!-- Decorative Swash on the M -->
+  <path d="M352,142 C362,142 376,148 378,162 C380,172 370,178 360,174 C354,171 352,165 356,161 C360,157 368,162 365,167 C363,169 360,169 359,168 C357,166 360,162 365,160 C370,157 372,150 368,146 C362,142 352,142 352,142 Z" 
+        fill="#652F94" />
+
+  <!-- Slogan: HECHO PARA BRILLAR COMO TU -->
+  <text x="24" y="202" class="vb-slogan-txt" fill="#8668D8">HECHO PARA BRILLAR COMO TU</text>
+</svg>

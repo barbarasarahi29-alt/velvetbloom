@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 400" width="100%" height="100%" fill="none">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,900;1,9..144,900&amp;family=Plus+Jakarta+Sans:wght@500;600&amp;display=swap');
+      .vb-text-velvet {
+        font-family: 'Fraunces', 'Bookman Old Style', Georgia, serif;
+        font-size: 190px;
+        font-weight: 900;
+        letter-spacing: -2px;
+        fill: #350e55;
+      }
+      .vb-text-bloom {
+        font-family: 'Fraunces', 'Bookman Old Style', Georgia, serif;
+        font-size: 205px;
+        font-weight: 900;
+        letter-spacing: -2px;
+        fill: #6e3398;
+      }
+      .vb-text-slogan {
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        font-size: 58px;
+        font-weight: 500;
+        letter-spacing: -0.5px;
+        fill: #350e55;
+      }
+    </style>
+  </defs>
+
+  <!-- 3 Brand Petals Perched on 'et' of Velvet -->
+  <g transform="translate(630, 68)">
+    <!-- Left petal: Deep plum -->
+    <path d="M0,0 C-22,-10 -36,-38 -28,-62 C-20,-80 4,-85 20,-68 C28,-50 20,-22 0,0 Z" 
+          fill="#491657" />
+    <!-- Center petal: Medium violet -->
+    <path d="M0,0 C-18,-24 -16,-62 0,-85 C16,-62 18,-24 0,0 Z" 
+          fill="#703496" />
+    <!-- Right petal: Lavender lilac -->
+    <path d="M0,0 C22,-10 36,-38 28,-62 C20,-80 -4,-85 -20,-68 C-28,-50 -20,-22 0,0 Z" 
+          fill="#A68BC9" />
+  </g>
+
+  <!-- Top word: Velvet -->
+  <text x="20" y="200" class="vb-text-velvet">Velvet</text>
+
+  <!-- Bottom word: Bloom -->
+  <text x="38" y="300" class="vb-text-bloom">Bloom</text>
+
+  <!-- Swash curl on the 'm' of Bloom -->
+  <path d="M825,245 C848,245 876,262 880,288 C884,310 864,325 842,319 C830,315 825,302 834,293 C842,285 860,294 855,304 C851,308 846,308 844,306 C840,302 846,294 855,290 C866,285 869,270 859,259 C846,248 825,245 825,245 Z" 
+        fill="#6e3398" />
+
+  <!-- Slogan: Hecho para brillar como tu -->
+  <text x="20" y="378" class="vb-text-slogan">Hecho para brillar como tu</text>
+</svg>

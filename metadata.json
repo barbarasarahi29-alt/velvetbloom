@@ -1,0 +1,6 @@
+{
+  "name": "Velvet Bloom - Catálogo Digital y Boutique",
+  "description": "Catálogo digital exclusivo y elegante de Velvet Bloom: accesorios, detalles, flores eternas, bolsos, carteras y relojes con pedidos directos por WhatsApp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
