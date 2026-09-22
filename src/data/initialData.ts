@@ -2,13 +2,13 @@ import { Category, Product } from '../types/index.ts';
 
 // Generated brand assets
 export const ASSETS = {
-  hero: '/src/assets/images/vb_hero_lifestyle_1790107630695.jpg',
-  catDetalles: '/src/assets/images/vb_cat_detalles_1790107641321.jpg',
-  catAccesorios: '/src/assets/images/vb_cat_accesorios_1790107653497.jpg',
-  catBolsos: '/src/assets/images/vb_cat_bolsos_1790107663208.jpg',
-  catRelojes: '/src/assets/images/vb_cat_relojes_1790107673114.jpg',
-  catCarteras: '/src/assets/images/vb_cat_carteras_1790107682929.jpg',
-  catGorras: '/src/assets/images/vb_cat_gorras_1790107690742.jpg',
+  hero: '/images/vb_hero_lifestyle_1790107630695.jpg',
+  catDetalles: '/images/vb_cat_detalles_1790107641321.jpg',
+  catAccesorios: '/images/vb_cat_accesorios_1790107653497.jpg',
+  catBolsos: '/images/vb_cat_bolsos_1790107663208.jpg',
+  catRelojes: '/images/vb_cat_relojes_1790107673114.jpg',
+  catCarteras: '/images/vb_cat_carteras_1790107682929.jpg',
+  catGorras: '/images/vb_cat_gorras_1790107690742.jpg',
 };
 
 export const INITIAL_CATEGORIES: Category[] = [

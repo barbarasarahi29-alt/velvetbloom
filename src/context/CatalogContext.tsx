@@ -48,6 +48,35 @@ interface CatalogContextType {
   openWhatsAppUrl: (url: string) => void;
 }
 
+const sanitizeImagePath = (url: string): string => {
+  if (!url) return url;
+  if (url.startsWith('/src/assets/images/')) {
+    return url.replace('/src/assets/images/', '/images/');
+  }
+  if (url.startsWith('src/assets/images/')) {
+    return url.replace('src/assets/images/', '/images/');
+  }
+  if (url.startsWith('/src/assets/')) {
+    return url.replace('/src/assets/', '/');
+  }
+  return url;
+};
+
+const sanitizeProduct = (p: Product): Product => ({
+  ...p,
+  images: Array.isArray(p.images) ? p.images.map(sanitizeImagePath) : [],
+});
+
+const sanitizeCategory = (c: Category): Category => ({
+  ...c,
+  image: sanitizeImagePath(c.image),
+});
+
+const sanitizeCartItem = (item: CartItem): CartItem => ({
+  ...item,
+  product: sanitizeProduct(item.product),
+});
+
 const CatalogContext = createContext<CatalogContextType | undefined>(undefined);
 
 export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -57,7 +86,9 @@ export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const stored = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map(sanitizeProduct);
+        }
       }
     } catch (e) {
       console.error('Failed to load products from localStorage', e);
@@ -71,7 +102,9 @@ export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const stored = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map(sanitizeCategory);
+        }
       }
     } catch (e) {
       console.error('Failed to load categories from localStorage', e);
@@ -83,7 +116,12 @@ export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.CART);
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          return parsed.map(sanitizeCartItem);
+        }
+      }
     } catch (e) {
       console.error('Failed to load cart from localStorage', e);
     }
