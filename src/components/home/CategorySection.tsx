@@ -75,7 +75,7 @@ export const CategorySection: React.FC = () => {
                     <h3 className="font-serif text-2xl sm:text-3xl font-semibold leading-tight text-white group-hover:text-[#C3A6FF] transition-colors">
                       {cat.name}
                     </h3>
-                    <p className="text-xs text-white/80 line-clamp-2 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
+                    <p className="text-xs text-white/90 line-clamp-3 leading-relaxed opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                       {cat.description}
                     </p>
                   </div>
