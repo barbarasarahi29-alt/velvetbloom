@@ -69,7 +69,7 @@ export const WhatsAppCallout: React.FC = () => {
             </h2>
 
             <p className="text-sm sm:text-base text-white/80 leading-relaxed">
-              Escríbenos directamente a nuestro WhatsApp oficial. Te asesoramos con la selección de flores, collares o accesorios para que sorprendas a esa persona especial.
+              Escríbenos directamente a nuestro WhatsApp. Te asesoramos con tu pedido completamente. Sorprende a tu persona amada o regálate a ti mismo, todos los días son una ocasión especial.
             </p>
 
             <div className="pt-2 flex flex-col sm:flex-row items-center gap-4">

@@ -28,7 +28,7 @@ export const Footer: React.FC = () => {
             </div>
             <div>
               <h4 className="font-semibold text-sm tracking-wide text-[#FAF8F5]">Detalles Inolvidables</h4>
-              <p className="text-xs text-[#FAF8F5]/60 mt-0.5">Flores preservadas eternas y collares con significado.</p>
+              <p className="text-xs text-[#FAF8F5]/60 mt-0.5">Obsequios hechos con amor.</p>
             </div>
           </div>
 
@@ -50,7 +50,7 @@ export const Footer: React.FC = () => {
           <div className="space-y-4">
             <Logo variant="light" size="lg" />
             <p className="text-xs sm:text-sm text-[#FAF8F5]/70 leading-relaxed max-w-sm">
-              Una experiencia pensada para regalar momentos y lucir con distinción. Descubre nuestra colección de accesorios, flores eternas, bolsos y relojes.
+              Una experiencia pensada para obsequiar momentos especiales y lucir a diario con distinción. Descubre nuestra colección completa de artículos pensados exclusivamente para ti!
             </p>
             <div className="pt-2">
               <button
@@ -94,7 +94,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-xs sm:text-sm text-[#FAF8F5]/70">
               <li>
                 <span className="text-white block font-medium">Horario de Respuestas:</span>
-                <span className="text-[#FAF8F5]/60">Lunes a Domingo · 8:00 AM – 9:00 PM</span>
+                <span className="text-[#FAF8F5]/60">Lunes a Sábado - 8:00 AM - 8:00 PM</span>
               </li>
               <li>
                 <span className="text-white block font-medium">Moneda del Catálogo:</span>
@@ -102,7 +102,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <span className="text-white block font-medium">Envíos y Entregas:</span>
-                <span className="text-[#FAF8F5]/60">Envíos a todo el país y entregas coordinadas</span>
+                <span className="text-[#FAF8F5]/60">Envíos nacionales y delivery</span>
               </li>
             </ul>
           </div>

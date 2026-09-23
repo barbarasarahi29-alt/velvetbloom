@@ -26,7 +26,7 @@ export const Hero: React.FC = () => {
             {/* Delicate Kicker */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs text-[#C3A6FF] font-medium tracking-widest uppercase">
               <Sparkles className="w-3.5 h-3.5 text-[#C3A6FF]" />
-              <span>Visita nuestro catálogo</span>
+              <span>HECHO PARA BRILLAR COMO TÚ</span>
             </div>
 
             {/* Headline */}
@@ -66,15 +66,15 @@ export const Hero: React.FC = () => {
             <div className="pt-4 flex items-center justify-center lg:justify-start gap-6 text-xs text-[#C3A6FF]/90 font-medium">
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#C3A6FF]" />
-                <span>Catálogo en USD</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C3A6FF]" />
                 <span>Accesorios para dama y caballero</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#C3A6FF]" />
-                <span>Envíos coordinados</span>
+                <span>Moda importada exclusiva</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#C3A6FF]" />
+                <span>Envios Nacionales y Delivery</span>
               </div>
             </div>
           </div>

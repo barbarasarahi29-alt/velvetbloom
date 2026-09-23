@@ -27,7 +27,7 @@ export const CategorySection: React.FC = () => {
             </h2>
           </div>
           <p className="text-sm text-[#6B5B7E] max-w-md leading-relaxed">
-            Seis líneas pensadas para cada momento especial. Descubre desde arreglos florales imperecederos hasta bolsos y joyería selecta.
+            Explora nuestras categorías seleccionadas: desde accesorios y piezas de moda hasta detalles, relojes y lencería. Opciones pensadas para elevar tu estilo en el día a día o en ocasiones especiales.
           </p>
         </div>
 

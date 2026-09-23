@@ -67,10 +67,52 @@ const sanitizeProduct = (p: Product): Product => ({
   images: Array.isArray(p.images) ? p.images.map(sanitizeImagePath) : [],
 });
 
+const normalizeProduct = (p: Product): Product => {
+  const sanitized = sanitizeProduct(p);
+  if (sanitized.categoryId === 'cat-5' && (sanitized.sku?.startsWith('CAR-') || sanitized.id.startsWith('prod-car-'))) {
+    return { ...sanitized, categoryId: 'cat-3' };
+  }
+  return sanitized;
+};
+
 const sanitizeCategory = (c: Category): Category => ({
   ...c,
   image: sanitizeImagePath(c.image),
 });
+
+const normalizeCategories = (rawCats: Category[]): Category[] => {
+  const map = new Map<string, Category>();
+  rawCats.forEach(c => map.set(c.id, sanitizeCategory(c)));
+
+  // If cat-3 was 'Bolsos', update to 'Bolsos y Carteras'
+  const cat3 = map.get('cat-3');
+  if (cat3 && (cat3.name === 'Bolsos' || !cat3.name.includes('Carteras'))) {
+    cat3.name = 'Bolsos y Carteras';
+    cat3.slug = 'bolsos-carteras';
+    cat3.description = 'Totes, satchels, carteras, billeteras y clutches de silueta editorial y materiales premium.';
+  }
+
+  // If cat-5 was 'Carteras', update to 'Pijamas y Lencería'
+  const cat5 = map.get('cat-5');
+  if (cat5 && (cat5.name === 'Carteras' || !cat5.name.toLowerCase().includes('pijama'))) {
+    cat5.name = 'Pijamas y Lencería';
+    cat5.slug = 'pijamas-lenceria';
+    cat5.description = 'Pijamas de satén sedoso, lencería delicada y conjuntos diseñados para confort y distinción.';
+  }
+
+  // Desired order: cat-1, cat-2, cat-3, cat-4, cat-6 (Relojes), cat-5 (Pijamas y Lencería)
+  const priorityOrder = ['cat-1', 'cat-2', 'cat-3', 'cat-4', 'cat-6', 'cat-5'];
+  const ordered: Category[] = [];
+  priorityOrder.forEach(id => {
+    const item = map.get(id);
+    if (item) {
+      ordered.push(item);
+      map.delete(id);
+    }
+  });
+  map.forEach(item => ordered.push(item));
+  return ordered;
+};
 
 const sanitizeCartItem = (item: CartItem): CartItem => ({
   ...item,
@@ -87,7 +129,13 @@ export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map(sanitizeProduct);
+          const list = parsed.map(normalizeProduct);
+          const hasPijamas = list.some(p => p.categoryId === 'cat-5');
+          if (!hasPijamas) {
+            const pijDemo = INITIAL_PRODUCTS.filter(p => p.categoryId === 'cat-5');
+            return [...list, ...pijDemo];
+          }
+          return list;
         }
       }
     } catch (e) {
@@ -103,7 +151,7 @@ export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map(sanitizeCategory);
+          return normalizeCategories(parsed);
         }
       }
     } catch (e) {

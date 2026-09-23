@@ -28,9 +28,9 @@ export const INITIAL_CATEGORIES: Category[] = [
   },
   {
     id: 'cat-3',
-    name: 'Bolsos',
-    slug: 'bolsos',
-    description: 'Totes, satchels y minibolsos de silueta editorial y materiales premium.',
+    name: 'Bolsos y Carteras',
+    slug: 'bolsos-carteras',
+    description: 'Totes, satchels, carteras, billeteras y clutches de silueta editorial y materiales premium.',
     image: ASSETS.catBolsos,
   },
   {
@@ -41,18 +41,18 @@ export const INITIAL_CATEGORIES: Category[] = [
     image: ASSETS.catGorras,
   },
   {
-    id: 'cat-5',
-    name: 'Carteras',
-    slug: 'carteras',
-    description: 'Billeteras continentales, tarjeteros slim y clutches en tonos lavanda y mauve.',
-    image: ASSETS.catCarteras,
-  },
-  {
     id: 'cat-6',
     name: 'Relojes',
     slug: 'relojes',
     description: 'Relojería contemporánea en oro rosa y acabados pulidos de alta precisión.',
     image: ASSETS.catRelojes,
+  },
+  {
+    id: 'cat-5',
+    name: 'Pijamas y Lencería',
+    slug: 'pijamas-lenceria',
+    description: 'Pijamas de satén sedoso, lencería delicada y conjuntos diseñados para confort y distinción.',
+    image: ASSETS.catCarteras,
   },
 ];
 
@@ -346,7 +346,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     updatedAt: '2026-03-11T13:00:00Z',
   },
 
-  // --- CARTERAS ---
+  // --- BOLSOS Y CARTERAS ---
   {
     id: 'prod-car-1',
     name: 'Billetera Continental Velvet Lavender',
@@ -354,7 +354,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     description: 'Billetera de gran capacidad con apertura completa mediante cierre metálico perimetral dorado. Confeccionada en piel suave texturizada con múltiples compartimentos para organizar billetes, documentos y hasta 12 tarjetas.',
     price: 34.0,
     sku: 'CAR-001',
-    categoryId: 'cat-5',
+    categoryId: 'cat-3',
     images: [
       ASSETS.catCarteras,
       ASSETS.catBolsos,
@@ -380,7 +380,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     description: 'Tarjetero ultraligero diseñado para llevar en bolsillos pequeños o clutches de fiesta. 6 ranuras exteriores y un bolsillo central para billetes doblados.',
     price: 18.0,
     sku: 'CAR-002',
-    categoryId: 'cat-5',
+    categoryId: 'cat-3',
     images: [
       ASSETS.catCarteras,
     ],
@@ -396,6 +396,58 @@ export const INITIAL_PRODUCTS: Product[] = [
     isDemo: true,
     createdAt: '2026-03-13T15:00:00Z',
     updatedAt: '2026-03-13T15:00:00Z',
+  },
+
+  // --- PIJAMAS Y LENCERÍA ---
+  {
+    id: 'prod-pij-1',
+    name: 'Set Pijama Satin Silk "Velvet Romance"',
+    slug: 'set-pijama-satin-silk-velvet-romance',
+    description: 'Conjunto de dos piezas en satén de seda ultra suave con ribetes a contraste y botones aperlados. Corte holgado y elegante con caída impecable para noches de descanso o momentos especiales.',
+    price: 38.0,
+    sku: 'PIJ-001',
+    categoryId: 'cat-5',
+    images: [
+      ASSETS.catCarteras,
+      ASSETS.catDetalles,
+    ],
+    colors: ['Lavanda Satin', 'Rosa Cuarzo', 'Negro Obsidiana'],
+    sizes: ['S', 'M', 'L'],
+    features: [
+      'Satén premium transpirable de tacto ultra sedoso',
+      'Cuello notch clásico con ribetes en tono perla',
+      'Pantalón con pretina elástica y lazo satinado ajustable',
+      'Empaque de regalo exclusivo Velvet Bloom',
+    ],
+    available: true,
+    featured: true,
+    isDemo: true,
+    createdAt: '2026-03-13T16:00:00Z',
+    updatedAt: '2026-03-13T16:00:00Z',
+  },
+  {
+    id: 'prod-pij-2',
+    name: 'Bata Kimono Satén Floral Lace Bloom',
+    slug: 'bata-kimono-saten-floral-lace-bloom',
+    description: 'Bata kimono de longitud media confeccionada en satén suave con mangas tres cuartos ribeteadas en encaje floral delicado. Incluye cinto satinado extraíble.',
+    price: 32.0,
+    sku: 'PIJ-002',
+    categoryId: 'cat-5',
+    images: [
+      ASSETS.catCarteras,
+    ],
+    colors: ['Blanco Nupcial', 'Lila Suave', 'Vino Tinto'],
+    sizes: ['Unitalla (S-L)'],
+    features: [
+      'Encaje floral delicado en mangas y ruedo',
+      'Cinturón desmontable con trabillas laterales',
+      'Tejido ligero antiarrugas de secado rápido',
+    ],
+    available: true,
+    featured: false,
+    isDemo: true,
+    createdAt: '2026-03-13T17:00:00Z',
+    updatedAt: '2026-03-13T17:00:00Z',
   },
 
   // --- RELOJES ---
