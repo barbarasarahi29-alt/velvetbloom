@@ -8,6 +8,10 @@ export const FeaturedSection: React.FC = () => {
 
   const featuredProducts = products.filter(p => p.featured).slice(0, 6);
 
+  if (featuredProducts.length === 0) {
+    return null;
+  }
+
   return (
     <section className="py-16 sm:py-24 bg-[#FAF8F5] border-t border-[#381058]/8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

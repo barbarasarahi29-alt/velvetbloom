@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Product, Category, CartItem, ViewMode } from '../types/index.ts';
-import { INITIAL_CATEGORIES, INITIAL_PRODUCTS } from '../data/initialData.ts';
+import { INITIAL_CATEGORIES } from '../data/initialData.ts';
+import { supabase } from '../lib/supabase.ts';
 
 const STORAGE_KEYS = {
-  PRODUCTS: 'velvet_bloom_products_v1',
   CATEGORIES: 'velvet_bloom_categories_v1',
   CART: 'velvet_bloom_cart_v1',
 };
@@ -24,16 +24,22 @@ interface CatalogContextType {
   setSelectedProduct: (product: Product | null) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  
-  // Product CRUD
-  addProduct: (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => Product;
-  updateProduct: (id: string, updates: Partial<Product>) => void;
-  deleteProduct: (id: string) => void;
-  toggleAvailability: (id: string) => void;
-  toggleFeatured: (id: string) => void;
+
+  // Supabase state
+  isLoadingProducts: boolean;
+  supabaseError: string | null;
+  isTableMissing: boolean;
+  refreshProducts: () => Promise<void>;
+
+  // Product CRUD (Live with Supabase)
+  addProduct: (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Product>;
+  updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
+  toggleAvailability: (id: string) => Promise<void>;
+  toggleFeatured: (id: string) => Promise<void>;
   clearDemoProducts: () => void;
   restoreDemoProducts: () => void;
-  
+
   // Cart Actions
   addToCart: (product: Product, quantity?: number, selectedColor?: string, selectedSize?: string) => void;
   removeFromCart: (cartItemId: string) => void;
@@ -41,7 +47,7 @@ interface CatalogContextType {
   clearCart: () => void;
   cartTotal: number;
   cartCount: number;
-  
+
   // WhatsApp Link Helpers
   getWhatsAppProductUrl: (product: Product) => string;
   getWhatsAppCartUrl: () => string;
@@ -65,27 +71,10 @@ const sanitizeImagePath = (url: string): string => {
   return url;
 };
 
-const LEGACY_CAT_MAP: Record<string, string> = {
-  'cat-1': 'cat-dama',
-  'cat-2': 'cat-detalles',
-  'cat-3': 'cat-bolsos',
-  'cat-4': 'cat-gorras',
-  'cat-5': 'cat-pijamas',
-  'cat-6': 'cat-relojes',
-};
-
 const sanitizeProduct = (p: Product): Product => ({
   ...p,
   images: Array.isArray(p.images) ? p.images.map(sanitizeImagePath) : [],
 });
-
-const normalizeProduct = (p: Product): Product => {
-  const sanitized = sanitizeProduct(p);
-  if (LEGACY_CAT_MAP[sanitized.categoryId]) {
-    sanitized.categoryId = LEGACY_CAT_MAP[sanitized.categoryId];
-  }
-  return sanitized;
-};
 
 const sanitizeCategory = (c: Category): Category => ({
   ...c,
@@ -107,36 +96,57 @@ const normalizeCategories = (rawCats: Category[]): Category[] => {
   return Array.from(catMap.values());
 };
 
-const sanitizeCartItem = (item: CartItem): CartItem => ({
-  ...item,
-  product: sanitizeProduct(item.product),
-});
+const mapRowToProduct = (row: any): Product => {
+  const imageUrl = row.image_url || '';
+  let images: string[] = [];
+
+  if (Array.isArray(row.images) && row.images.length > 0) {
+    images = row.images.filter(Boolean);
+    if (imageUrl && !images.includes(imageUrl)) {
+      images.unshift(imageUrl);
+    }
+  } else if (imageUrl) {
+    images = [imageUrl];
+  }
+
+  const categoryId = row.category || 'cat-dama';
+  const rawId = String(row.id);
+  const slug =
+    (row.name || 'producto')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') + `-${rawId.slice(0, 4)}`;
+
+  return {
+    id: rawId,
+    name: row.name || 'Sin nombre',
+    slug,
+    description: row.description || '',
+    price: Number(row.price) || 0,
+    sku: row.sku || `VB-${rawId.slice(0, 6).toUpperCase()}`,
+    categoryId,
+    images: images.map(sanitizeImagePath),
+    colors: Array.isArray(row.colors) ? row.colors : [],
+    sizes: Array.isArray(row.sizes) ? row.sizes : [],
+    features: Array.isArray(row.features) ? row.features : [],
+    available: row.available !== false,
+    featured: Boolean(row.featured),
+    isDemo: false,
+    createdAt: row.created_at || new Date().toISOString(),
+    updatedAt: row.updated_at || row.created_at || new Date().toISOString(),
+  };
+};
 
 const CatalogContext = createContext<CatalogContextType | undefined>(undefined);
 
 export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Load products from localStorage or fallback to INITIAL_PRODUCTS
-  const [products, setProducts] = useState<Product[]>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const hasOldDemoIds = parsed.some(p => p.isDemo && LEGACY_CAT_MAP[p.categoryId]);
-          if (hasOldDemoIds) {
-            const customProducts = parsed
-              .filter(p => !p.isDemo)
-              .map(normalizeProduct);
-            return [...INITIAL_PRODUCTS, ...customProducts];
-          }
-          return parsed.map(normalizeProduct);
-        }
-      }
-    } catch (e) {
-      console.error('Failed to load products from localStorage', e);
-    }
-    return INITIAL_PRODUCTS;
-  });
+  // Live products from Supabase (starts with 0 products)
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState<boolean>(true);
+  const [supabaseError, setSupabaseError] = useState<string | null>(null);
+  const [isTableMissing, setIsTableMissing] = useState<boolean>(false);
 
   // Load categories
   const [categories, setCategories] = useState<Category[]>(() => {
@@ -154,14 +164,17 @@ export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return INITIAL_CATEGORIES;
   });
 
-  // Load cart
+  // Load cart from localStorage
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.CART);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          return parsed.map(sanitizeCartItem);
+          return parsed.map(item => ({
+            ...item,
+            product: sanitizeProduct(item.product),
+          }));
         }
       }
     } catch (e) {
@@ -170,30 +183,11 @@ export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return [];
   });
 
-  // UI State
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [activeView, setActiveView] = useState<ViewMode>('home');
   const [selectedCategorySlug, setSelectedCategorySlug] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Persist products
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
-    } catch (e) {
-      console.error('Failed to save products to localStorage', e);
-    }
-  }, [products]);
-
-  // Persist categories
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
-    } catch (e) {
-      console.error('Failed to save categories to localStorage', e);
-    }
-  }, [categories]);
 
   // Persist cart
   useEffect(() => {
@@ -204,17 +198,28 @@ export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [cart]);
 
-  // Handle URL hash changes for deep linking (e.g. #catalogo, #admin, #inicio)
+  // Persist categories
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+    } catch (e) {
+      console.error('Failed to save categories to localStorage', e);
+    }
+  }, [categories]);
+
+  // Handle URL hash routing
   useEffect(() => {
     const handleHash = () => {
-      const hash = window.location.hash.toLowerCase();
+      const hash = window.location.hash;
       if (hash.startsWith('#admin')) {
         setActiveView('admin');
       } else if (hash.startsWith('#catalogo')) {
         setActiveView('catalog');
         const params = new URLSearchParams(hash.split('?')[1] || '');
-        const cat = params.get('categoria');
-        if (cat) setSelectedCategorySlug(cat);
+        const catSlug = params.get('categoria');
+        if (catSlug) {
+          setSelectedCategorySlug(catSlug);
+        }
       } else {
         setActiveView('home');
       }
@@ -236,32 +241,194 @@ export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [activeView, selectedCategorySlug]);
 
-  // Product CRUD
-  const addProduct = (data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const now = new Date().toISOString();
-    const id = `prod-custom-${Date.now()}`;
-    const newProduct: Product = {
-      ...data,
-      id,
-      createdAt: now,
-      updatedAt: now,
-      isDemo: false,
+  // Fetch products from Supabase
+  const fetchProducts = useCallback(async () => {
+    setIsLoadingProducts(true);
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.warn('Supabase products query returned error:', error);
+        if (
+          error.code === 'PGRST205' ||
+          error.message?.toLowerCase().includes('could not find the table') ||
+          error.message?.toLowerCase().includes('relation "public.products" does not exist')
+        ) {
+          setIsTableMissing(true);
+          setSupabaseError('La tabla "products" aún no ha sido creada en tu base de datos de Supabase.');
+        } else {
+          setSupabaseError(error.message);
+        }
+        setProducts([]);
+        return;
+      }
+
+      setIsTableMissing(false);
+      setSupabaseError(null);
+
+      if (Array.isArray(data)) {
+        const mapped = data.map(mapRowToProduct);
+        setProducts(mapped);
+      } else {
+        setProducts([]);
+      }
+    } catch (err: any) {
+      console.error('Error fetching products from Supabase:', err);
+      setSupabaseError(err.message || 'Error de conexión con Supabase');
+      setProducts([]);
+    } finally {
+      setIsLoadingProducts(false);
+    }
+  }, []);
+
+  // Initialize and subscribe to Supabase Realtime changes
+  useEffect(() => {
+    fetchProducts();
+
+    const channel = supabase
+      .channel('velvet_bloom_products_realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'products' },
+        (payload) => {
+          console.log('Realtime change event from Supabase products:', payload);
+          fetchProducts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
     };
-    setProducts(prev => [newProduct, ...prev]);
-    return newProduct;
+  }, [fetchProducts]);
+
+  // Product CRUD (Live with Supabase)
+  const addProduct = async (data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> => {
+    const imageUrl = data.images?.[0] || '';
+
+    // Full schema payload
+    const fullPayload = {
+      name: data.name,
+      description: data.description || '',
+      price: Number(data.price) || 0,
+      category: data.categoryId,
+      image_url: imageUrl,
+      sku: data.sku,
+      available: data.available !== false,
+      featured: Boolean(data.featured),
+      colors: data.colors || [],
+      sizes: data.sizes || [],
+      features: data.features || [],
+      images: data.images || [],
+    };
+
+    const { data: insertedData, error } = await supabase
+      .from('products')
+      .insert([fullPayload])
+      .select()
+      .single();
+
+    if (error) {
+      console.warn('Full payload insert failed, checking column fallback:', error);
+      // Fallback if table only has standard 7 columns (id, name, description, price, category, image_url, created_at)
+      if (error.code === 'PGRST204' || error.message?.includes('column')) {
+        const corePayload = {
+          name: data.name,
+          description: data.description || '',
+          price: Number(data.price) || 0,
+          category: data.categoryId,
+          image_url: imageUrl,
+        };
+        const { data: coreData, error: coreErr } = await supabase
+          .from('products')
+          .insert([corePayload])
+          .select()
+          .single();
+
+        if (coreErr) {
+          console.error('Error inserting product in Supabase:', coreErr);
+          throw coreErr;
+        }
+
+        const newProd = mapRowToProduct(coreData);
+        setProducts(prev => [newProd, ...prev.filter(p => p.id !== newProd.id)]);
+        return newProd;
+      }
+      throw error;
+    }
+
+    const newProd = mapRowToProduct(insertedData);
+    setProducts(prev => [newProd, ...prev.filter(p => p.id !== newProd.id)]);
+    return newProd;
   };
 
-  const updateProduct = (id: string, updates: Partial<Product>) => {
-    const now = new Date().toISOString();
+  const updateProduct = async (id: string, updates: Partial<Product>): Promise<void> => {
+    const payload: Record<string, any> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.name !== undefined) payload.name = updates.name;
+    if (updates.description !== undefined) payload.description = updates.description;
+    if (updates.price !== undefined) payload.price = Number(updates.price);
+    if (updates.categoryId !== undefined) payload.category = updates.categoryId;
+    if (updates.images !== undefined) {
+      payload.image_url = updates.images[0] || '';
+      payload.images = updates.images;
+    }
+    if (updates.sku !== undefined) payload.sku = updates.sku;
+    if (updates.available !== undefined) payload.available = updates.available;
+    if (updates.featured !== undefined) payload.featured = updates.featured;
+    if (updates.colors !== undefined) payload.colors = updates.colors;
+    if (updates.sizes !== undefined) payload.sizes = updates.sizes;
+    if (updates.features !== undefined) payload.features = updates.features;
+
+    const { error } = await supabase
+      .from('products')
+      .update(payload)
+      .eq('id', id);
+
+    if (error) {
+      if (error.code === 'PGRST204' || error.message?.includes('column')) {
+        // Fallback with only the core fields
+        const corePayload: Record<string, any> = {};
+        if (updates.name !== undefined) corePayload.name = updates.name;
+        if (updates.description !== undefined) corePayload.description = updates.description;
+        if (updates.price !== undefined) corePayload.price = Number(updates.price);
+        if (updates.categoryId !== undefined) corePayload.category = updates.categoryId;
+        if (updates.images !== undefined) corePayload.image_url = updates.images[0] || '';
+
+        const { error: coreErr } = await supabase
+          .from('products')
+          .update(corePayload)
+          .eq('id', id);
+
+        if (coreErr) {
+          console.error('Error updating product in Supabase:', coreErr);
+          throw coreErr;
+        }
+      } else {
+        console.error('Error updating product in Supabase:', error);
+        throw error;
+      }
+    }
+
+    // Local optimistic update
     setProducts(prev =>
-      prev.map(item => (item.id === id ? { ...item, ...updates, updatedAt: now } : item))
+      prev.map(item => (item.id === id ? { ...item, ...updates, updatedAt: new Date().toISOString() } : item))
     );
     if (selectedProduct?.id === id) {
-      setSelectedProduct(prev => (prev ? { ...prev, ...updates, updatedAt: now } : null));
+      setSelectedProduct(prev => (prev ? { ...prev, ...updates } : null));
     }
   };
 
-  const deleteProduct = (id: string) => {
+  const deleteProduct = async (id: string): Promise<void> => {
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (error) {
+      console.error('Error deleting product in Supabase:', error);
+      throw error;
+    }
     setProducts(prev => prev.filter(item => item.id !== id));
     setCart(prev => prev.filter(item => item.product.id !== id));
     if (selectedProduct?.id === id) {
@@ -269,16 +436,36 @@ export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const toggleAvailability = (id: string) => {
+  const toggleAvailability = async (id: string): Promise<void> => {
+    const target = products.find(p => p.id === id);
+    if (!target) return;
+    const newAvail = !target.available;
+
     setProducts(prev =>
-      prev.map(item => (item.id === id ? { ...item, available: !item.available } : item))
+      prev.map(item => (item.id === id ? { ...item, available: newAvail } : item))
     );
+
+    try {
+      await supabase.from('products').update({ available: newAvail }).eq('id', id);
+    } catch (e) {
+      console.warn('Could not toggle availability on Supabase', e);
+    }
   };
 
-  const toggleFeatured = (id: string) => {
+  const toggleFeatured = async (id: string): Promise<void> => {
+    const target = products.find(p => p.id === id);
+    if (!target) return;
+    const newFeatured = !target.featured;
+
     setProducts(prev =>
-      prev.map(item => (item.id === id ? { ...item, featured: !item.featured } : item))
+      prev.map(item => (item.id === id ? { ...item, featured: newFeatured } : item))
     );
+
+    try {
+      await supabase.from('products').update({ featured: newFeatured }).eq('id', id);
+    } catch (e) {
+      console.warn('Could not toggle featured on Supabase', e);
+    }
   };
 
   const clearDemoProducts = () => {
@@ -287,7 +474,7 @@ export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const restoreDemoProducts = () => {
     setCategories(INITIAL_CATEGORIES);
-    setProducts(INITIAL_PRODUCTS);
+    fetchProducts();
   };
 
   // Cart operations
@@ -384,6 +571,10 @@ export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setSelectedProduct,
         searchQuery,
         setSearchQuery,
+        isLoadingProducts,
+        supabaseError,
+        isTableMissing,
+        refreshProducts: fetchProducts,
         addProduct,
         updateProduct,
         deleteProduct,
