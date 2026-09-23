@@ -89,8 +89,11 @@ export const AdminDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setActiveView('home')}
-              className="text-left focus:outline-none"
+              onClick={() => {
+                window.history.pushState({}, '', '/');
+                setActiveView('home');
+              }}
+              className="text-left focus:outline-none cursor-pointer"
               title="Volver a la tienda"
             >
               <Logo size="sm" showSubtitle={false} />
@@ -102,8 +105,11 @@ export const AdminDashboard: React.FC = () => {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setActiveView('catalog')}
-              className="text-xs font-medium text-[#381058] hover:text-[#8668D8] px-3 py-1.5 rounded-lg border border-[#381058]/10 bg-[#FAF8F5] transition-colors"
+              onClick={() => {
+                window.history.pushState({}, '', '/');
+                setActiveView('catalog');
+              }}
+              className="text-xs font-medium text-[#381058] hover:text-[#8668D8] px-3 py-1.5 rounded-lg border border-[#381058]/10 bg-[#FAF8F5] transition-colors cursor-pointer"
             >
               Ver Catálogo Público →
             </button>
@@ -111,9 +117,10 @@ export const AdminDashboard: React.FC = () => {
             <button
               onClick={() => {
                 logout();
+                window.history.pushState({}, '', '/');
                 setActiveView('home');
               }}
-              className="flex items-center gap-1.5 text-xs font-semibold text-red-600 hover:text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
+              className="flex items-center gap-1.5 text-xs font-semibold text-red-600 hover:text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
               title="Cerrar sesión"
             >
               <LogOut className="w-3.5 h-3.5" />

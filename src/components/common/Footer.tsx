@@ -1,12 +1,10 @@
 import React from 'react';
-import { MessageCircle, Heart, ShieldCheck, Sparkles, Lock } from 'lucide-react';
+import { MessageCircle, Heart, ShieldCheck, Sparkles } from 'lucide-react';
 import { useCatalog } from '../../context/CatalogContext.tsx';
-import { useAuth } from '../../context/AuthContext.tsx';
 import { Logo } from '../brand/Logo.tsx';
 
 export const Footer: React.FC = () => {
   const { setActiveView, setSelectedCategorySlug, categories, getWhatsAppCartUrl, openWhatsAppUrl } = useCatalog();
-  const { isAuthenticated, setIsLoginModalOpen } = useAuth();
 
   return (
     <footer className="bg-[#230938] text-[#FAF8F5] pt-16 pb-12 border-t border-[#381058]/30">
@@ -123,24 +121,10 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom copyright and admin */}
+        {/* Bottom copyright */}
         <div className="pt-8 border-t border-[#FAF8F5]/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#FAF8F5]/50">
           <p>© {new Date().getFullYear()} VELVET BLOOM. Todos los derechos reservados.</p>
-          <div className="flex items-center gap-6">
-            <button
-              onClick={() => {
-                if (isAuthenticated) {
-                  setActiveView('admin');
-                } else {
-                  setIsLoginModalOpen(true);
-                }
-              }}
-              className="hover:text-[#C3A6FF] transition-colors inline-flex items-center gap-1.5"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span>{isAuthenticated ? 'Panel Administrativo' : 'Portal de Administración'}</span>
-            </button>
-          </div>
+          <p className="text-[11px] text-[#FAF8F5]/40">Hecho para brillar como tú</p>
         </div>
 
       </div>

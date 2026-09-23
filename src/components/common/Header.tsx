@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Search, ShoppingBag, Lock, Menu, X, ArrowRight } from 'lucide-react';
+import { Search, ShoppingBag, Menu, X, ArrowRight } from 'lucide-react';
 import { useCatalog } from '../../context/CatalogContext.tsx';
-import { useAuth } from '../../context/AuthContext.tsx';
 import { Logo } from '../brand/Logo.tsx';
 
 export const Header: React.FC = () => {
@@ -15,7 +14,6 @@ export const Header: React.FC = () => {
     setSearchQuery,
   } = useCatalog();
 
-  const { isAuthenticated, setIsLoginModalOpen } = useAuth();
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -136,26 +134,6 @@ export const Header: React.FC = () => {
             )}
           </button>
 
-          {/* Admin shortcut */}
-          <button
-            onClick={() => {
-              if (isAuthenticated) {
-                setActiveView('admin');
-              } else {
-                setIsLoginModalOpen(true);
-              }
-            }}
-            className={`p-2 sm:p-2.5 rounded-full transition-colors ${
-              activeView === 'admin'
-                ? 'bg-[#381058] text-white shadow-sm'
-                : 'text-[#8668D8] hover:text-[#381058] hover:bg-[#C3A6FF]/15'
-            }`}
-            title={isAuthenticated ? 'Panel Administrativo' : 'Acceso Administrador'}
-            aria-label="Panel administrativo"
-          >
-            <Lock className="w-4 h-4" />
-          </button>
-
           {/* Mobile Menu Hamburger */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -211,22 +189,6 @@ export const Header: React.FC = () => {
             >
               <span>Quiénes somos</span>
               <ArrowRight className="w-4 h-4 text-[#8668D8]" />
-            </button>
-            <button
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                if (isAuthenticated) {
-                  setActiveView('admin');
-                } else {
-                  setIsLoginModalOpen(true);
-                }
-              }}
-              className="text-left py-2.5 px-3 rounded-lg hover:bg-[#C3A6FF]/15 flex items-center justify-between text-xs text-[#6B5B7E]"
-            >
-              <span className="flex items-center gap-2">
-                <Lock className="w-3.5 h-3.5" />
-                {isAuthenticated ? 'Panel Administrativo (Activo)' : 'Acceso de Administrador'}
-              </span>
             </button>
           </div>
         </div>

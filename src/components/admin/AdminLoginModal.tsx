@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { X, Lock, Sparkles, KeyRound, AlertCircle } from 'lucide-react';
-import { useAuth, DEFAULT_ADMIN } from '../../context/AuthContext.tsx';
+import { X, Lock, AlertCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext.tsx';
 import { useCatalog } from '../../context/CatalogContext.tsx';
-import { Logo } from '../brand/Logo.tsx';
 
 export const AdminLoginModal: React.FC = () => {
   const { isLoginModalOpen, setIsLoginModalOpen, login } = useAuth();
@@ -14,6 +13,14 @@ export const AdminLoginModal: React.FC = () => {
 
   if (!isLoginModalOpen) return null;
 
+  const handleClose = () => {
+    setIsLoginModalOpen(false);
+    if (window.location.pathname === '/admin' || window.location.hash === '#admin') {
+      window.history.pushState({}, '', '/');
+      setActiveView('home');
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
@@ -21,6 +28,9 @@ export const AdminLoginModal: React.FC = () => {
     const res = login(email, password);
     if (res.success) {
       setActiveView('admin');
+      if (window.location.pathname !== '/admin') {
+        window.history.pushState({}, '', '/admin');
+      }
       setIsLoginModalOpen(false);
       setEmail('');
       setPassword('');
@@ -29,20 +39,14 @@ export const AdminLoginModal: React.FC = () => {
     }
   };
 
-  const handleUseDemoCredentials = () => {
-    setEmail(DEFAULT_ADMIN.email);
-    setPassword(DEFAULT_ADMIN.password);
-    setErrorMsg('');
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-      <div className="fixed inset-0" onClick={() => setIsLoginModalOpen(false)} />
+      <div className="fixed inset-0" onClick={handleClose} />
 
       <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 sm:p-8 z-10 border border-[#381058]/10 space-y-6">
         {/* Close Button */}
         <button
-          onClick={() => setIsLoginModalOpen(false)}
+          onClick={handleClose}
           className="absolute top-4 right-4 p-2 text-gray-400 hover:text-[#381058] rounded-full hover:bg-[#FAF8F5] transition-colors"
           aria-label="Cerrar modal"
         >
@@ -79,6 +83,7 @@ export const AdminLoginModal: React.FC = () => {
             <input
               type="text"
               required
+              autoFocus
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="admin@velvetbloom.com"
@@ -102,34 +107,14 @@ export const AdminLoginModal: React.FC = () => {
 
           <button
             type="submit"
-            className="w-full py-3 px-4 rounded-xl bg-[#381058] hover:bg-[#4d1877] text-white text-sm font-semibold transition-all shadow-md active:scale-98"
+            className="w-full py-3 px-4 rounded-xl bg-[#381058] hover:bg-[#4d1877] text-white text-sm font-semibold transition-all shadow-md active:scale-98 cursor-pointer"
           >
             Iniciar Sesión
           </button>
         </form>
-
-        {/* Demo Credentials Auto-Fill box */}
-        <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#C3A6FF]/40 text-xs text-[#381058] space-y-2">
-          <div className="flex items-center justify-between font-semibold">
-            <span className="flex items-center gap-1.5 text-[#8668D8]">
-              <KeyRound className="w-3.5 h-3.5" />
-              Credenciales de Administrador:
-            </span>
-            <button
-              type="button"
-              onClick={handleUseDemoCredentials}
-              className="text-[#381058] hover:underline font-bold text-[11px] bg-white px-2 py-0.5 rounded border border-[#C3A6FF]"
-            >
-              Autollenar
-            </button>
-          </div>
-          <div className="text-[11px] font-mono text-[#5a436e] space-y-0.5">
-            <div>Usuario: <span className="text-[#381058] font-bold">{DEFAULT_ADMIN.email}</span></div>
-            <div>Contraseña: <span className="text-[#381058] font-bold">{DEFAULT_ADMIN.password}</span></div>
-          </div>
-        </div>
-
       </div>
     </div>
   );
 };
+
+export default AdminLoginModal;
