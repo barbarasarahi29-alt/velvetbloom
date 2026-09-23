@@ -5,6 +5,7 @@ export const ASSETS = {
   hero: '/images/vb_hero_lifestyle_1790107630695.jpg',
   catDetalles: '/images/vb_cat_detalles_1790107641321.jpg',
   catAccesorios: '/images/vb_cat_accesorios_1790107653497.jpg',
+  catCaballero: '/images/cat_accesorios_caballero_1790186191750.jpg',
   catBolsos: '/images/vb_cat_bolsos_1790107663208.jpg',
   catRelojes: '/images/vb_cat_relojes_1790107673114.jpg',
   catCarteras: '/images/vb_cat_carteras_1790107682929.jpg',
@@ -17,14 +18,14 @@ export const INITIAL_CATEGORIES: Category[] = [
     name: 'Accesorios de Dama',
     slug: 'accesorios-dama',
     description: 'Brillo y tendencia para tu día a día. Diseños en acero inoxidable, rodio y oro chino pensados para durar y hacerte destacar.',
-    image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80',
+    image: ASSETS.catAccesorios,
   },
   {
     id: 'cat-caballero',
     name: 'Accesorios de Caballero',
     slug: 'accesorios-caballero',
     description: 'Estilo y resistencia. Piezas masculinas en acero inoxidable, rodio y oro chino que aportan el toque perfecto a tu look.',
-    image: 'https://images.unsplash.com/photo-1611591475817-062e08fbca4b?auto=format&fit=crop&w=800&q=80',
+    image: ASSETS.catCaballero,
   },
   {
     id: 'cat-detalles',
@@ -134,7 +135,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     sku: 'ACC-C01',
     categoryId: 'cat-caballero',
     images: [
-      'https://images.unsplash.com/photo-1611591475817-062e08fbca4b?auto=format&fit=crop&w=800&q=80',
+      ASSETS.catCaballero,
       'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80',
     ],
     colors: ['Plata Cepillada', 'Negro Mate PVD', 'Dorado Champagne'],

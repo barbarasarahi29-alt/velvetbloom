@@ -464,20 +464,39 @@ export const AdminDashboard: React.FC = () => {
         {activeTab === 'categories' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((cat, idx) => {
-              const count = products.filter(p => p.categoryId === cat.id).length;
+              const categoryProducts = products.filter(p => p.categoryId === cat.id);
+              const count = categoryProducts.length;
+
+              const latestProductWithImage = [...categoryProducts]
+                .sort((a, b) => {
+                  const timeA = new Date(a.updatedAt || a.createdAt || 0).getTime();
+                  const timeB = new Date(b.updatedAt || b.createdAt || 0).getTime();
+                  return timeB - timeA;
+                })
+                .find(p => Array.isArray(p.images) && p.images.length > 0 && Boolean(p.images[0]?.trim()));
+
+              const displayImage = latestProductWithImage?.images?.[0] || (count > 0 ? cat.image : null);
+
               return (
                 <div
                   key={cat.id}
                   className="bg-white rounded-2xl p-5 border border-[#381058]/8 shadow-xs flex flex-col justify-between space-y-4"
                 >
                   <div className="flex gap-4">
-                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 shrink-0">
-                      <img
-                        src={cat.image}
-                        alt={cat.name}
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#381058] shrink-0 flex items-center justify-center">
+                      {displayImage ? (
+                        <img
+                          src={displayImage}
+                          alt={cat.name}
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = '/images/vb_cat_accesorios_1790107653497.jpg';
+                          }}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Sparkles className="w-6 h-6 text-[#C3A6FF]" />
+                      )}
                     </div>
                     <div>
                       <span className="font-mono text-[10px] text-[#8668D8]">0{idx + 1}</span>

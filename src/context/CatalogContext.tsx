@@ -50,6 +50,9 @@ interface CatalogContextType {
 
 const sanitizeImagePath = (url: string): string => {
   if (!url) return url;
+  if (url.includes('1611591475817-062e08fbca4b')) {
+    return '/images/cat_accesorios_caballero_1790186191750.jpg';
+  }
   if (url.startsWith('/src/assets/images/')) {
     return url.replace('/src/assets/images/', '/images/');
   }

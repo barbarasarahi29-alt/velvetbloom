@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { useCatalog } from '../../context/CatalogContext.tsx';
 
 export const CategorySection: React.FC = () => {
@@ -34,21 +34,51 @@ export const CategorySection: React.FC = () => {
         {/* 8 Categories Visual Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {categories.map((cat, index) => {
-            const count = products.filter(p => p.categoryId === cat.id).length;
-            
+            const categoryProducts = products.filter(p => p.categoryId === cat.id);
+            const count = categoryProducts.length;
+
+            // Dynamically select the image of the first / most recently updated product in this category
+            const latestProductWithImage = [...categoryProducts]
+              .sort((a, b) => {
+                const timeA = new Date(a.updatedAt || a.createdAt || 0).getTime();
+                const timeB = new Date(b.updatedAt || b.createdAt || 0).getTime();
+                return timeB - timeA;
+              })
+              .find(p => Array.isArray(p.images) && p.images.length > 0 && Boolean(p.images[0]?.trim()));
+
+            // Product image takes priority; if products exist with cat.image fallback; if empty, null for fallback UI
+            const coverImage = latestProductWithImage?.images?.[0] || (count > 0 ? cat.image : null);
+
             return (
               <div
                 key={cat.id}
                 onClick={() => handleCategorySelect(cat.slug)}
                 className="group relative h-80 sm:h-96 rounded-3xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-500 bg-[#381058]"
               >
-                {/* Image backdrop */}
-                <img
-                  src={cat.image}
-                  alt={cat.name}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108 opacity-85 group-hover:opacity-95"
-                />
+                {/* Image backdrop or elegant Velvet Bloom fallback */}
+                {coverImage ? (
+                  <img
+                    src={coverImage}
+                    alt={cat.name}
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = '/images/vb_cat_accesorios_1790107653497.jpg';
+                    }}
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108 opacity-85 group-hover:opacity-95"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[#381058] via-[#522578] to-[#1E052B] flex flex-col items-center justify-center relative overflow-hidden transition-transform duration-700 group-hover:scale-105">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(195,166,255,0.2),transparent_70%)]" />
+                    <div className="relative z-10 flex flex-col items-center text-center px-4">
+                      <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 flex items-center justify-center text-[#C3A6FF] mb-3 group-hover:scale-110 transition-transform">
+                        <Sparkles className="w-6 h-6" />
+                      </div>
+                      <span className="text-[11px] uppercase tracking-widest text-[#C3A6FF]/80 font-medium">
+                        Colección en Preparación
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Subtle dark gradient scrim for contrast */}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#26073d]/90 via-[#381058]/35 to-transparent transition-opacity" />
