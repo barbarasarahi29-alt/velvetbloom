@@ -108,7 +108,7 @@ export const Hero: React.FC = () => {
                   <button
                     onClick={() => {
                       setActiveView('catalog');
-                      setSelectedCategorySlug('detalles');
+                      setSelectedCategorySlug('obsequios-detalles');
                     }}
                     className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors shrink-0 text-[#C3A6FF]"
                     aria-label="Ver categoría de detalles"

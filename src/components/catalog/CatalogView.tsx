@@ -93,7 +93,7 @@ export const CatalogView: React.FC = () => {
           <p className="text-sm text-[#6B5B7E] mt-3">
             {activeCategory
               ? activeCategory.description
-              : 'Explora nuestra gama de accesorios, flores eternas, bolsos y relojes. Selecciona tus favoritos y haz tu pedido directamente por WhatsApp.'}
+              : 'Explora nuestra gama de accesorios para dama y caballero, obsequios y detalles, bolsos, gorras, relojes, moda velvet y lencería. Selecciona tus favoritos y haz tu pedido directamente por WhatsApp.'}
           </p>
         </div>
 

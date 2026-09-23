@@ -62,6 +62,15 @@ const sanitizeImagePath = (url: string): string => {
   return url;
 };
 
+const LEGACY_CAT_MAP: Record<string, string> = {
+  'cat-1': 'cat-dama',
+  'cat-2': 'cat-detalles',
+  'cat-3': 'cat-bolsos',
+  'cat-4': 'cat-gorras',
+  'cat-5': 'cat-pijamas',
+  'cat-6': 'cat-relojes',
+};
+
 const sanitizeProduct = (p: Product): Product => ({
   ...p,
   images: Array.isArray(p.images) ? p.images.map(sanitizeImagePath) : [],
@@ -69,8 +78,8 @@ const sanitizeProduct = (p: Product): Product => ({
 
 const normalizeProduct = (p: Product): Product => {
   const sanitized = sanitizeProduct(p);
-  if (sanitized.categoryId === 'cat-5' && (sanitized.sku?.startsWith('CAR-') || sanitized.id.startsWith('prod-car-'))) {
-    return { ...sanitized, categoryId: 'cat-3' };
+  if (LEGACY_CAT_MAP[sanitized.categoryId]) {
+    sanitized.categoryId = LEGACY_CAT_MAP[sanitized.categoryId];
   }
   return sanitized;
 };
@@ -81,37 +90,18 @@ const sanitizeCategory = (c: Category): Category => ({
 });
 
 const normalizeCategories = (rawCats: Category[]): Category[] => {
-  const map = new Map<string, Category>();
-  rawCats.forEach(c => map.set(c.id, sanitizeCategory(c)));
-
-  // If cat-3 was 'Bolsos', update to 'Bolsos y Carteras'
-  const cat3 = map.get('cat-3');
-  if (cat3 && (cat3.name === 'Bolsos' || !cat3.name.includes('Carteras'))) {
-    cat3.name = 'Bolsos y Carteras';
-    cat3.slug = 'bolsos-carteras';
-    cat3.description = 'Totes, satchels, carteras, billeteras y clutches de silueta editorial y materiales premium.';
+  const hasNewSchema = rawCats.some(c => c.id === 'cat-dama' || c.id === 'cat-caballero');
+  if (!hasNewSchema) {
+    return INITIAL_CATEGORIES;
   }
-
-  // If cat-5 was 'Carteras', update to 'Pijamas y Lencería'
-  const cat5 = map.get('cat-5');
-  if (cat5 && (cat5.name === 'Carteras' || !cat5.name.toLowerCase().includes('pijama'))) {
-    cat5.name = 'Pijamas y Lencería';
-    cat5.slug = 'pijamas-lenceria';
-    cat5.description = 'Pijamas de satén sedoso, lencería delicada y conjuntos diseñados para confort y distinción.';
-  }
-
-  // Desired order: cat-1, cat-2, cat-3, cat-4, cat-6 (Relojes), cat-5 (Pijamas y Lencería)
-  const priorityOrder = ['cat-1', 'cat-2', 'cat-3', 'cat-4', 'cat-6', 'cat-5'];
-  const ordered: Category[] = [];
-  priorityOrder.forEach(id => {
-    const item = map.get(id);
-    if (item) {
-      ordered.push(item);
-      map.delete(id);
+  const catMap = new Map<string, Category>();
+  INITIAL_CATEGORIES.forEach(c => catMap.set(c.id, c));
+  rawCats.forEach(c => {
+    if (!catMap.has(c.id)) {
+      catMap.set(c.id, sanitizeCategory(c));
     }
   });
-  map.forEach(item => ordered.push(item));
-  return ordered;
+  return Array.from(catMap.values());
 };
 
 const sanitizeCartItem = (item: CartItem): CartItem => ({
@@ -129,13 +119,14 @@ export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const list = parsed.map(normalizeProduct);
-          const hasPijamas = list.some(p => p.categoryId === 'cat-5');
-          if (!hasPijamas) {
-            const pijDemo = INITIAL_PRODUCTS.filter(p => p.categoryId === 'cat-5');
-            return [...list, ...pijDemo];
+          const hasOldDemoIds = parsed.some(p => p.isDemo && LEGACY_CAT_MAP[p.categoryId]);
+          if (hasOldDemoIds) {
+            const customProducts = parsed
+              .filter(p => !p.isDemo)
+              .map(normalizeProduct);
+            return [...INITIAL_PRODUCTS, ...customProducts];
           }
-          return list;
+          return parsed.map(normalizeProduct);
         }
       }
     } catch (e) {
@@ -292,6 +283,7 @@ export const CatalogProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const restoreDemoProducts = () => {
+    setCategories(INITIAL_CATEGORIES);
     setProducts(INITIAL_PRODUCTS);
   };
 

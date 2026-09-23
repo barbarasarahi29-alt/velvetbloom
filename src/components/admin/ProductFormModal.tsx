@@ -55,7 +55,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setFeatured(productToEdit.featured);
     } else {
       setName('');
-      setCategoryId(categories[0]?.id || 'cat-1');
+      setCategoryId(categories[0]?.id || 'cat-dama');
       setPrice('');
       setSku(`VB-${Math.floor(100 + Math.random() * 900)}`);
       setDescription('');

@@ -31,8 +31,8 @@ export const CategorySection: React.FC = () => {
           </p>
         </div>
 
-        {/* 6 Categories Visual Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        {/* 8 Categories Visual Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {categories.map((cat, index) => {
             const count = products.filter(p => p.categoryId === cat.id).length;
             
