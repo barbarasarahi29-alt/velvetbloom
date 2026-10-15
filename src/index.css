@@ -43,3 +43,17 @@ h1, h2, h3, .font-serif {
 ::-webkit-scrollbar-thumb:hover {
   background: #8668D8;
 }
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2.2s infinite ease-in-out;
+}
+
