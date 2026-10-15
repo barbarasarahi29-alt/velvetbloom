@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ShoppingBag, Eye, Sparkles } from 'lucide-react';
 import { Product } from '../../types/index.ts';
 import { useCatalog } from '../../context/CatalogContext.tsx';
@@ -11,9 +11,30 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { categories, addToCart, setSelectedProduct } = useCatalog();
   const [imageError, setImageError] = useState(false);
   const [isAddedRecently, setIsAddedRecently] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const cardRef = useRef<HTMLElement>(null);
 
   const category = categories.find(c => c.id === product.categoryId);
   const mainImage = product.images?.[0] || '';
+
+  // Deactivate card if user clicks/taps outside
+  useEffect(() => {
+    if (!isActive) return;
+
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      if (cardRef.current && !cardRef.current.contains(e.target as Node)) {
+        setIsActive(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+    };
+  }, [isActive]);
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -30,16 +51,39 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     setTimeout(() => setIsAddedRecently(false), 1400);
   };
 
-  const handleCardClick = () => {
+  const handleOpenModal = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedProduct(product);
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Touch screen detection for fluid mobile UX
+    const isTouchScreen =
+      typeof window !== 'undefined' &&
+      (window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window);
+
+    // On touch screens: first tap reveals options/expands description smoothly
+    if (isTouchScreen && window.innerWidth < 1024 && !isActive) {
+      e.preventDefault();
+      setIsActive(true);
+      return;
+    }
+
+    // On PC or second tap on mobile: open full product modal
     setSelectedProduct(product);
   };
 
   return (
     <article
+      ref={cardRef}
       onClick={handleCardClick}
-      className="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-[#381058]/8 hover:border-[#8668D8]/30 hover:shadow-lg transition-all duration-300 cursor-pointer"
+      className={`group relative flex flex-col bg-white rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer ${
+        isActive
+          ? 'border-[#8668D8] shadow-xl ring-2 ring-[#8668D8]/20'
+          : 'border-[#381058]/8 hover:border-[#8668D8]/30 hover:shadow-lg'
+      }`}
     >
-      {/* Visual Product Media Container (65-75% height feel) */}
+      {/* Visual Product Media Container */}
       <div className="relative aspect-[4/4.2] sm:aspect-[4/4.5] w-full bg-[#FAF8F5] overflow-hidden">
         {!imageError && mainImage ? (
           <img
@@ -62,7 +106,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         )}
 
-        {/* Quiet availability & demo text indicator */}
+        {/* Quiet availability & demo indicator */}
         <div className="absolute top-3 left-3 flex flex-col gap-1 z-10 pointer-events-none">
           {!product.available && (
             <span className="text-[11px] font-medium tracking-wider uppercase px-2.5 py-1 rounded-full bg-[#381058]/90 text-white backdrop-blur-sm shadow-sm">
@@ -81,8 +125,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </div>
 
-        {/* Hover Quick Actions Overlay */}
-        <div className="absolute inset-x-3 bottom-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        {/* Subtle bottom scrim (max 20% opacity at bottom edge) for action buttons contrast without darkening the product photo */}
+        <div
+          className={`absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/20 via-black/5 to-transparent pointer-events-none transition-opacity duration-300 ${
+            isActive ? 'opacity-100' : 'opacity-0 sm:group-hover:opacity-100'
+          }`}
+        />
+
+        {/* Quick Actions Bar - visible on hover (desktop) or on active tap (mobile) */}
+        <div
+          className={`absolute inset-x-3 bottom-3 flex items-center gap-2 transition-all duration-300 z-10 ${
+            isActive
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-2 pointer-events-none sm:pointer-events-auto sm:group-hover:opacity-100 sm:group-hover:translate-y-0'
+          }`}
+        >
           <button
             onClick={handleQuickAdd}
             disabled={!product.available}
@@ -100,13 +157,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </button>
 
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCardClick();
-            }}
-            className="p-2.5 rounded-xl bg-white/90 hover:bg-white text-[#381058] shadow-md transition-colors"
-            title="Ver detalles del producto"
-            aria-label="Ver detalles del producto"
+            onClick={handleOpenModal}
+            className="p-2.5 rounded-xl bg-white/95 hover:bg-white text-[#381058] shadow-md transition-colors"
+            title="Ver detalles completos del producto"
+            aria-label="Ver detalles completos del producto"
           >
             <Eye className="w-3.5 h-3.5" />
           </button>
@@ -127,6 +181,35 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <h3 className="font-serif text-base sm:text-lg font-semibold text-[#381058] line-clamp-2 leading-snug group-hover:text-[#8668D8] transition-colors">
             {product.name}
           </h3>
+
+          {/* Mini Description: Clear & legible on mobile, fluid animated expansion on touch / desktop hover */}
+          {product.description && (
+            <div className="mt-2">
+              <p
+                className={`text-xs text-[#6B5B7E] leading-relaxed transition-all duration-300 ${
+                  isActive
+                    ? 'line-clamp-none text-[#381058] font-normal'
+                    : 'line-clamp-2 group-hover:text-[#381058]'
+                }`}
+              >
+                {product.description}
+              </p>
+
+              {/* Discreet touch indicator for mobile users */}
+              <div className="block sm:hidden mt-1.5">
+                {isActive ? (
+                  <span className="text-[10px] font-semibold text-[#8668D8] flex items-center gap-1">
+                    <span>Toca de nuevo para abrir modal</span>
+                    <span>→</span>
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-[#8668D8]/70 font-medium">
+                    Toca para opciones rápidas
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Price & availability footer */}
@@ -139,13 +222,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
 
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCardClick();
-            }}
-            className="text-xs font-medium text-[#8668D8] hover:text-[#381058] transition-colors py-1 px-2 -mr-2"
+            onClick={handleOpenModal}
+            className="text-xs font-medium text-[#8668D8] hover:text-[#381058] transition-colors py-1.5 px-2.5 rounded-lg hover:bg-[#8668D8]/10 flex items-center gap-1 group/btn"
           >
-            Ver producto →
+            <span>Ver producto</span>
+            <span className="transition-transform group-hover/btn:translate-x-0.5">→</span>
           </button>
         </div>
       </div>

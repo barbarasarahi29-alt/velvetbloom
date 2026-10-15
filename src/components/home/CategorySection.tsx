@@ -53,7 +53,7 @@ export const CategorySection: React.FC = () => {
               <div
                 key={cat.id}
                 onClick={() => handleCategorySelect(cat.slug)}
-                className="group relative h-80 sm:h-96 rounded-3xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-500 bg-[#381058]"
+                className="group relative h-80 sm:h-96 rounded-3xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-500 bg-[#1E052B]"
               >
                 {/* Image backdrop or elegant Velvet Bloom fallback */}
                 {coverImage ? (
@@ -64,7 +64,7 @@ export const CategorySection: React.FC = () => {
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).src = '/images/vb_cat_accesorios_1790107653497.jpg';
                     }}
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108 opacity-85 group-hover:opacity-95"
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-[#381058] via-[#522578] to-[#1E052B] flex flex-col items-center justify-center relative overflow-hidden transition-transform duration-700 group-hover:scale-105">
@@ -80,32 +80,47 @@ export const CategorySection: React.FC = () => {
                   </div>
                 )}
 
-                {/* Subtle dark gradient scrim for contrast */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#26073d]/90 via-[#381058]/35 to-transparent transition-opacity" />
+                {/* Top subtle protective scrim for index counter and icon on bright images */}
+                <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#1E052B]/35 to-transparent pointer-events-none" />
+
+                {/* Signature dark purple gradient scrim: 75-80% opacity at base, smooth transition, keeping top of photo clear */}
+                <div className="absolute inset-x-0 bottom-0 h-[68%] sm:h-[65%] bg-gradient-to-t from-[#1E052B]/85 via-[#2A083D]/60 via-45% to-transparent pointer-events-none transition-opacity duration-300" />
 
                 {/* Content Box */}
-                <div className="absolute inset-0 p-6 sm:p-7 flex flex-col justify-between text-white z-10">
+                <div className="absolute inset-0 p-6 sm:p-7 flex flex-col justify-between text-white z-10 pointer-events-none">
                   {/* Top: index and arrow */}
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs text-[#C3A6FF] font-medium tracking-wider">
+                    <span
+                      className="font-mono text-xs text-white/95 font-medium tracking-wider"
+                      style={{ textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}
+                    >
                       0{index + 1}
                     </span>
-                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white group-hover:bg-[#FAF8F5] group-hover:text-[#381058] transition-all duration-300">
+                    <div className="w-10 h-10 rounded-full bg-black/35 backdrop-blur-md border border-white/25 flex items-center justify-center text-white group-hover:bg-[#FAF8F5] group-hover:text-[#381058] transition-all duration-300 shadow-md pointer-events-auto">
                       <ArrowUpRight className="w-5 h-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </div>
                   </div>
 
                   {/* Bottom: Title & Description */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 pointer-events-auto">
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] uppercase tracking-wider text-[#C3A6FF] font-semibold">
+                      <span
+                        className="text-[11px] uppercase tracking-wider text-[#C3A6FF] font-semibold"
+                        style={{ textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}
+                      >
                         {count} {count === 1 ? 'producto' : 'productos'}
                       </span>
                     </div>
-                    <h3 className="font-serif text-2xl sm:text-3xl font-semibold leading-tight text-white group-hover:text-[#C3A6FF] transition-colors">
+                    <h3
+                      className="font-serif text-2xl sm:text-3xl font-semibold leading-tight text-white group-hover:text-[#E2D5FF] transition-colors"
+                      style={{ textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}
+                    >
                       {cat.name}
                     </h3>
-                    <p className="text-xs text-white/90 line-clamp-3 leading-relaxed opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                    <p
+                      className="text-xs text-white/95 line-clamp-2 sm:line-clamp-3 leading-relaxed opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 transform sm:translate-y-2 sm:group-hover:translate-y-0"
+                      style={{ textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}
+                    >
                       {cat.description}
                     </p>
                   </div>

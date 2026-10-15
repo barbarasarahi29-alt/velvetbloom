@@ -247,8 +247,8 @@ export const Hero: React.FC = () => {
                   </div>
                 )}
 
-                {/* Subtle top and bottom gradient overlays for readability and depth */}
-                <div className="absolute inset-0 z-15 bg-gradient-to-t from-black/75 via-transparent to-black/30 pointer-events-none" />
+                {/* Soft and subtle bottom gradient overlay for floating card contrast without dimming photos */}
+                <div className="absolute inset-0 z-15 bg-gradient-to-t from-black/55 via-transparent to-black/15 pointer-events-none" />
 
                 {/* Top Overlay Badge & Slide Progress Indicator */}
                 <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
